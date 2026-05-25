@@ -135,14 +135,50 @@ if pregunta_usuario:
                         }
                     })
 
-                respuesta_api = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": prompt_sistema},
-                        {"role": "user", "content": contenido_mensaje}
-                    ],
-                    model="llama-3.2-90b-vision",
-                    temperature=0.3
-                )
+modelo_a_usar = "llama-3.2-11b-vision-preview" 
+                
+                contenido_mensaje = [{"type": "text", "text": pregunta_usuario}]
+
+                if imagen_subida:
+                    bytes_img = imagen_subida.getvalue()
+                    base64_image = codificar_imagen(bytes_img)
+                    contenido_mensaje.append({
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        }
+                    })
+                else:
+                    # Si el usuario solo escribe texto, usamos un modelo ultra rápido de respaldo
+                    modelo_a_usar = "llama3-8b-8192"
+
+                try:
+                    respuesta_api = client.chat.completions.create(
+                        messages=[
+                            {"role": "system", "content": prompt_sistema},
+                            {"role": "user", "content": contenido_mensaje}
+                        ],
+                        model=modelo_a_usar,
+                        temperature=0.3
+                    )
+                except Exception as api_error:
+                    # SI EL MODELO DE VISIÓN SE CAE O NO EXISTE, ESTE RESPALDO SALVA LA APP:
+                    if "model_not_found" in str(api_error) or "404" in str(api_error):
+                        # Forzamos el modelo de texto general que jamás falla
+                        respuesta_api = client.chat.completions.create(
+                            messages=[
+                                {"role": "system", "content": prompt_sistema},
+                                {"role": "user", "content": pregunta_usuario}
+                            ],
+                            model="llama3-8b-8192",
+                            temperature=0.3
+                        )
+                    else:
+                        raise api_error
+
+                texto_tutor = respuesta_api.choices[0].message.content
+                st.write(texto_tutor)
+                st.session_state.messages.append({"role": "assistant", "content": texto_tutor})
 
                 texto_tutor = respuesta_api.choices[0].message.content
                 st.write(texto_tutor)
