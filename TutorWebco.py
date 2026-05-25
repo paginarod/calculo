@@ -140,7 +140,7 @@ if pregunta_usuario:
                         {"role": "system", "content": prompt_sistema},
                         {"role": "user", "content": contenido_mensaje}
                     ],
-                    model="llama-3.2-11b-vision-preview",
+                    model="llama-3.2-90b-vision-preview",
                     temperature=0.3
                 )
 
