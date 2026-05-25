@@ -43,7 +43,7 @@ audio_bytes = None
 pregunta_usuario = None
 texto_extraido_imagen = ""
 
-# 4. Panel lateral
+# 4. Panel lateral (Ahora solo para el estado de la biblioteca)
 with st.sidebar:
     st.header("📚 Biblioteca Personal")
     if texto_contexto:
@@ -51,36 +51,46 @@ with st.sidebar:
     else:
         st.error("❌ No se encontró el archivo 'cerebro_tutor.txt'.")
 
-    st.markdown("---")
-    st.header("🎤 Preguntar por Voz")
-    audio_bytes = audio_recorder(text="Toca para hablar", recording_color="#e74c3c", neutral_color="#3498db", icon_size="2x")
-
-    st.markdown("---")
-    st.header("📸 Subir Ejercicio")
-    imagen_subida = st.file_uploader("Sube la foto de tu problema", type=["png", "jpg", "jpeg"])
-    if imagen_subida:
-        st.image(imagen_subida, caption="Imagen cargada", use_container_width=True)
-        with st.spinner("Leyendo el problema matemático de la imagen... 🔍"):
-            try:
-                image = Image.open(imagen_subida)
-                img_np = np.array(image)
-                resultados = reader.readtext(img_np, detail=0)
-                if resultados:
-                    texto_extraido_imagen = " ".join(resultados)
-            except Exception as e:
-                st.warning(f"Nota del lector visual: {e}")
-
 # 5. Memoria del chat en pantalla
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "¡Hola! Soy un experto en cálculo. Puedes escribirme abajo, usar el micrófono o subir una imagen de tus problemas matemáticos."}
+        {"role": "assistant", "content": "¡Hola! Soy un experto en cálculo. Puedes escribirme aquí abajo, presionar el micrófono para hablar o subir una foto de tu ejercicio."}
     ]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 6. Procesamiento de audio
+st.markdown("---")
+
+# 6 y 7. Zona de entrada unificada (Abajo en la pantalla principal)
+# Creamos 3 columnas: una pequeña para audio, una pequeña para foto, y una grande para texto
+col_audio, col_foto, col_texto = st.columns([1, 1, 5], vertical_alignment="bottom")
+
+with col_audio:
+    audio_bytes = audio_recorder(text="", recording_color="#e74c3c", neutral_color="#3498db", icon_size="2x")
+
+with col_foto:
+    # Usamos un cargador compacto limitando el espacio visual
+    imagen_subida = st.file_uploader("📷", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
+
+with col_texto:
+    texto_input = st.chat_input("Escribe tu duda o ejercicio aquí...")
+
+# Muestra un resumen de la imagen si se subió una
+if imagen_subida:
+    st.info("📸 Imagen cargada listo para procesar.")
+    with st.spinner("Leyendo el problema matemático de la imagen... 🔍"):
+        try:
+            image = Image.open(imagen_subida)
+            img_np = np.array(image)
+            resultados = reader.readtext(img_np, detail=0)
+            if resultados:
+                texto_extraido_imagen = " ".join(resultados)
+        except Exception as e:
+            st.warning(f"Nota del lector visual: {e}")
+
+# Procesamiento de audio
 if audio_bytes:
     if "ultimo_audio" not in st.session_state:
         st.session_state["ultimo_audio"] = None
@@ -96,8 +106,8 @@ if audio_bytes:
             except Exception as e:
                 st.error("Error de audio: " + str(e))
 
-# 7. Barra de texto flotante
-if texto_input := st.chat_input("Escribe tu duda o ejercicio aquí..."):
+# Asignar texto de la barra si existe
+if texto_input:
     pregunta_usuario = texto_input
 
 # 8. Combinar texto e imagen de forma segura
@@ -137,7 +147,6 @@ if pregunta_usuario:
                     f"Utiliza este contexto extraído de sus libros cargados para responder si es relevante:\n{contexto_recortado}"
                 )
 
-                # Llamada estructurada con el modelo versátil de producción
                 respuesta_api = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": prompt_sistema},
