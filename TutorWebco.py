@@ -145,7 +145,7 @@ if pregunta_usuario:
                         {"role": "system", "content": prompt_sistema},
                         {"role": "user", "content": pregunta_usuario}
                     ],
-                    model="llama3-8b-8192",  # <--- CAMBIA ESTA LÍNEA
+                    model="llama-3.3-70b-versatile",  # <--- CAMBIA ESTA LÍNEA
                     temperature=0.3
                 )
 
