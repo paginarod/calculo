@@ -2,3 +2,4 @@ streamlit
 groq
 audio-recorder-streamlit
 gTTS
+easyocr
