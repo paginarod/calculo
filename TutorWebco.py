@@ -20,7 +20,6 @@ def inicializar_ia():
 
 @st.cache_resource
 def inicializar_lector():
-    # Inicializa el lector de imágenes en español e inglés
     return easyocr.Reader(['es', 'en'], gpu=False)
 
 client = inicializar_ia()
@@ -63,7 +62,6 @@ with st.sidebar:
         st.image(imagen_subida, caption="Imagen cargada", use_container_width=True)
         with st.spinner("Leyendo el problema matemático de la imagen... 🔍"):
             try:
-                # Convertir imagen para que EasyOCR la procese
                 image = Image.open(imagen_subida)
                 img_np = np.array(image)
                 resultados = reader.readtext(img_np, detail=0)
@@ -109,7 +107,7 @@ if texto_extraido_imagen and not pregunta_usuario:
         st.session_state["img_leida"] = True
         st.session_state["ultima_img"] = texto_extraido_imagen
 
-# 9. Motor de procesamiento con modelo de texto ultra-estable
+# 9. Motor de procesamiento principal
 if pregunta_usuario:
     st.session_state.messages.append({"role": "user", "content": pregunta_usuario})
     with st.chat_message("user"):
@@ -139,13 +137,13 @@ if pregunta_usuario:
                     f"Utiliza este contexto extraído de sus libros cargados para responder si es relevante:\n{contexto_recortado}"
                 )
 
-                # Llamamos al modelo Llama 3 estándar de texto (Garantizado sin errores 404)
-                    respuesta_api = client.chat.completions.create(
+                # Llamada estructurada con el modelo versátil de producción
+                respuesta_api = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": prompt_sistema},
                         {"role": "user", "content": pregunta_usuario}
                     ],
-                    model="llama-3.3-70b-versatile",  # <--- CAMBIA ESTA LÍNEA
+                    model="llama-3.3-70b-versatile",
                     temperature=0.3
                 )
 
