@@ -45,7 +45,7 @@ texto_extraido_imagen = ""
 
 # 4. Panel lateral (Ahora solo para el estado de la biblioteca)
 with st.sidebar:
-    st.header("📚 Biblioteca Personal")
+    st.header("📚Universidad Mariano Galvez")
     if texto_contexto:
         st.success("✅ Biblioteca cargada y lista")
     else:
