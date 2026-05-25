@@ -47,7 +47,12 @@ texto_extraido_imagen = ""
 with st.sidebar:
     st.header("📚Universidad Mariano Galvez")
     if texto_contexto:
-        st.success("✅ Biblioteca cargada y lista")
+        st.success("✅ PRIMER COMPAÑERO ")
+        st.success("✅ SEGUNDO COMPAÑERO ")
+        st.success("✅ TERCER COMPAÑERO ")
+        st.success("✅ CUARTO COMPAÑERO ")
+        st.success("✅ QUINTO COMPAÑERO ")
+
     else:
         st.error("❌ No se encontró el archivo 'cerebro_tutor.txt'.")
 
