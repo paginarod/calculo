@@ -4,6 +4,9 @@ from audio_recorder_streamlit import audio_recorder
 from gtts import gTTS
 import io
 import base64
+import easyocr
+import numpy as np
+from PIL import Image
 
 # 1. Configuración de la página
 st.set_page_config(page_title="Asistente de Cálculo Inteligente 🤓", page_icon="🤓", layout="centered")
@@ -15,10 +18,13 @@ API_KEY = st.secrets["GROQ_API_KEY"]
 def inicializar_ia():
     return Groq(api_key=API_KEY)
 
-client = inicializar_ia()
+@st.cache_resource
+def inicializar_lector():
+    # Inicializa el lector de imágenes en español e inglés
+    return easyocr.Reader(['es', 'en'], gpu=False)
 
-def codificar_imagen(imagen_bytes):
-    return base64.b64encode(imagen_bytes).decode('utf-8')
+client = inicializar_ia()
+reader = inicializar_lector()
 
 st.title("🤖 Asistente Virtual de Cálculo Inteligente")
 st.markdown("---")
@@ -34,9 +40,9 @@ def cargar_conocimiento():
 
 texto_contexto = cargar_conocimiento()
 
-# Inicialización de variables globales del ciclo
 audio_bytes = None
 pregunta_usuario = None
+texto_extraido_imagen = ""
 
 # 4. Panel lateral
 with st.sidebar:
@@ -55,18 +61,28 @@ with st.sidebar:
     imagen_subida = st.file_uploader("Sube la foto de tu problema", type=["png", "jpg", "jpeg"])
     if imagen_subida:
         st.image(imagen_subida, caption="Imagen cargada", use_container_width=True)
+        with st.spinner("Leyendo el problema matemático de la imagen... 🔍"):
+            try:
+                # Convertir imagen para que EasyOCR la procese
+                image = Image.open(imagen_subida)
+                img_np = np.array(image)
+                resultados = reader.readtext(img_np, detail=0)
+                if resultados:
+                    texto_extraido_imagen = " ".join(resultados)
+            except Exception as e:
+                st.warning(f"Nota del lector visual: {e}")
 
 # 5. Memoria del chat en pantalla
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "¡Hola! Soy un expert@ en cálculo. Puedes escribirme abajo, usar el micrófono de la izquierda o subir una imagen de tus problemas matemáticos."}
+        {"role": "assistant", "content": "¡Hola! Soy un experto en cálculo. Puedes escribirme abajo, usar el micrófono o subir una imagen de tus problemas matemáticos."}
     ]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 6. Procesamiento de la entrada de audio si existe
+# 6. Procesamiento de audio
 if audio_bytes:
     if "ultimo_audio" not in st.session_state:
         st.session_state["ultimo_audio"] = None
@@ -82,18 +98,18 @@ if audio_bytes:
             except Exception as e:
                 st.error("Error de audio: " + str(e))
 
-# 7. Barra de texto flotante abajo en la pantalla principal
+# 7. Barra de texto flotante
 if texto_input := st.chat_input("Escribe tu duda o ejercicio aquí..."):
     pregunta_usuario = texto_input
 
-# 8. Activación automática por pura imagen si no hay texto escrito
-if imagen_subida and not pregunta_usuario and "imagen_procesada" not in st.session_state:
-    pregunta_usuario = "Por favor, resuelve y explícame el ejercicio matemático que aparece en esta imagen."
-    st.session_state["imagen_procesada"] = True
-elif not imagen_subida and "imagen_procesada" in st.session_state:
-    del st.session_state["imagen_procesada"]
+# 8. Combinar texto e imagen de forma segura
+if texto_extraido_imagen and not pregunta_usuario:
+    if "img_leida" not in st.session_state or st.session_state.get("ultima_img") != texto_extraido_imagen:
+        pregunta_usuario = f"Resuelve paso a paso el siguiente ejercicio extraído de la imagen: {texto_extraido_imagen}"
+        st.session_state["img_leida"] = True
+        st.session_state["ultima_img"] = texto_extraido_imagen
 
-# 9. Motor de procesamiento principal de la Inteligencia Artificial
+# 9. Motor de procesamiento con modelo de texto ultra-estable
 if pregunta_usuario:
     st.session_state.messages.append({"role": "user", "content": pregunta_usuario})
     with st.chat_message("user"):
@@ -123,25 +139,13 @@ if pregunta_usuario:
                     f"Utiliza este contexto extraído de sus libros cargados para responder si es relevante:\n{contexto_recortado}"
                 )
 
-                contenido_mensaje = [{"type": "text", "text": pregunta_usuario}]
-
-                if imagen_subida:
-                    bytes_img = imagen_subida.getvalue()
-                    base64_image = codificar_imagen(bytes_img)
-                    contenido_mensaje.append({
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    })
-
-                # Usamos el modelo de visión de producción oficial que reemplazó a los previews
+                # Llamamos al modelo Llama 3 estándar de texto (Garantizado sin errores 404)
                 respuesta_api = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": prompt_sistema},
-                        {"role": "user", "content": contenido_mensaje}
+                        {"role": "user", "content": pregunta_usuario}
                     ],
-                    model="llama-3.2-11b-vision",
+                    model="llama3-8b-8192",
                     temperature=0.3
                 )
 
@@ -149,7 +153,7 @@ if pregunta_usuario:
                 st.write(texto_tutor)
                 st.session_state.messages.append({"role": "assistant", "content": texto_tutor})
 
-                # Generar audio en memoria limpia
+                # Generar audio
                 texto_limpio_para_leer = texto_tutor.replace('*', '').replace('$', ' ').replace('#', '')
                 tts = gTTS(text=texto_limpio_para_leer, lang='es', tld='com.mx')
                 audio_buffer = io.BytesIO()
@@ -159,7 +163,7 @@ if pregunta_usuario:
             except Exception as e:
                 st.error(f"❌ Error en el procesamiento: {e}")
 
-# 10. Reproducción del audio al final
+# 10. Reproducción del audio
 if "audio_reproducir" in st.session_state and st.session_state["audio_reproducir"]:
     st.audio(st.session_state["audio_reproducir"], format="audio/mp3", autoplay=True)
     st.session_state["audio_reproducir"] = None
