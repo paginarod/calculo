@@ -38,7 +38,7 @@ texto_contexto = cargar_conocimiento()
 audio_bytes = None
 pregunta_usuario = None
 
-# 4. Panel lateral (Aislamos el micrófono y el uploader aquí)
+# 4. Panel lateral
 with st.sidebar:
     st.header("📚 Biblioteca Personal")
     if texto_contexto:
@@ -59,7 +59,7 @@ with st.sidebar:
 # 5. Memoria del chat en pantalla
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "¡Hola! Soy un experto en cálculo. Puedes escribirme abajo, usar el micrófono de la izquierda o subir una imagen de tus problemas matemáticos."}
+        {"role": "assistant", "content": "¡Hola! Soy un expert@ en cálculo. Puedes escribirme abajo, usar el micrófono de la izquierda o subir una imagen de tus problemas matemáticos."}
     ]
 
 for msg in st.session_state.messages:
@@ -86,7 +86,7 @@ if audio_bytes:
 if texto_input := st.chat_input("Escribe tu duda o ejercicio aquí..."):
     pregunta_usuario = texto_input
 
-# 8. Activación automática por pura imagen si no hay texto
+# 8. Activación automática por pura imagen si no hay texto escrito
 if imagen_subida and not pregunta_usuario and "imagen_procesada" not in st.session_state:
     pregunta_usuario = "Por favor, resuelve y explícame el ejercicio matemático que aparece en esta imagen."
     st.session_state["imagen_procesada"] = True
@@ -135,6 +135,7 @@ if pregunta_usuario:
                         }
                     })
 
+                # Usamos el modelo de visión de producción oficial que reemplazó a los previews
                 respuesta_api = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": prompt_sistema},
@@ -158,7 +159,7 @@ if pregunta_usuario:
             except Exception as e:
                 st.error(f"❌ Error en el procesamiento: {e}")
 
-# 10. Reproducción segura del audio al final para evitar errores en el navegador
+# 10. Reproducción del audio al final
 if "audio_reproducir" in st.session_state and st.session_state["audio_reproducir"]:
     st.audio(st.session_state["audio_reproducir"], format="audio/mp3", autoplay=True)
     st.session_state["audio_reproducir"] = None
