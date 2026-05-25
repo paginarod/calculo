@@ -140,12 +140,12 @@ if pregunta_usuario:
                 )
 
                 # Llamamos al modelo Llama 3 estándar de texto (Garantizado sin errores 404)
-                respuesta_api = client.chat.completions.create(
+                    respuesta_api = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": prompt_sistema},
                         {"role": "user", "content": pregunta_usuario}
                     ],
-                    model="llama3-8b-8192",
+                    model="llama3-8b-8192",  # <--- CAMBIA ESTA LÍNEA
                     temperature=0.3
                 )
 
