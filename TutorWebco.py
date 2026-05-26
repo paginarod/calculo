@@ -49,7 +49,7 @@ with st.sidebar:
     if texto_contexto:
         st.success("✅ PRIMER COMPAÑERO ")
         st.success("✅ SEGUNDO COMPAÑERO ")
-        st.success("✅ TERCER COMPAÑERO ")
+        st.success("✅ Hector Eduardo Rodriguez Sis 2990-18-4883 ")
         st.success("✅ CUARTO COMPAÑERO ")
         st.success("✅ QUINTO COMPAÑERO ")
 
