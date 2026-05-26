@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 # 1. Configuración de la página
-st.set_page_config(page_title="Asistente de Cálculo Inteligente 🤓", page_icon="🤓", layout="centered")
+st.set_page_config(page_title="Asistente de Cálculo 🤓", page_icon="🤓", layout="centered")
 
 # 2. Conexión segura con Groq
 API_KEY = st.secrets["GROQ_API_KEY"]
