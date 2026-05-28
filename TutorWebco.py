@@ -8,7 +8,7 @@ import easyocr
 import numpy as np
 from PIL import Image
 
-# 1. Configuración de la página
+# *************************************************** CONFIGURACION DE LA PAGINA **************************************
 st.set_page_config(page_title="Asistente de Cálculo", page_icon=" ", layout="centered")
 
 # 2. Conexión segura con Groq
