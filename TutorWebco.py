@@ -73,7 +73,7 @@ st.markdown("---")
 col_audio, col_foto, col_texto = st.columns([1, 1, 5], vertical_alignment="bottom")
 
 with col_audio:
-    audio_bytes = audio_recorder(text="", recording_color="#e74c3c", neutral_color="#3498db", icon_size="1x")
+    audio_bytes = audio_recorder(text="", recording_color="#e74c3c", neutral_color="#3498db", icon_size="2x")
 
 with col_foto:
     # Usamos un cargador compacto limitando el espacio visual
