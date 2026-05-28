@@ -25,7 +25,7 @@ def inicializar_lector():
 client = inicializar_ia()
 reader = inicializar_lector()
 
-st.title("🤖 Asistente Virtual de Cálculo Inteligente")
+st.title("🤖 Asistente Virtual de Cálculo")
 st.markdown("---")
 
 # 3. Carga de la biblioteca
