@@ -59,7 +59,7 @@ with st.sidebar:
 # 5. Memoria del chat en pantalla
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "¡Hola! Soy un experto en cálculo. Puedes escribirme aquí abajo, presionar el micrófono para hablar o subir una foto de tu ejercicio."}
+        {"role": "assistant", "content": "¡Hola! Soy tu asistente de cálculo. Puedes escribirme aquí abajo, presionar el micrófono para hablar o subir una foto de tu ejercicio."}
     ]
 
 for msg in st.session_state.messages:
