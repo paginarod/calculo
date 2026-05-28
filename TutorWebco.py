@@ -25,7 +25,8 @@ def inicializar_lector():
 client = inicializar_ia()
 reader = inicializar_lector()
 
-st.title("🤖 Asistente Virtual de Cálculo")
+st.title("🤖 Asistente Virtual de Cálculo ")
+st.title(" U.M.G Facultad Ing en Sistemas ")
 st.markdown("---")
 
 # 3. Carga de la biblioteca
