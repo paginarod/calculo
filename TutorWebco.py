@@ -48,11 +48,12 @@ texto_extraido_imagen = ""
 with st.sidebar:
     st.header("Universidad Mariano Galvez")
     if texto_contexto:
-        st.success("✅ PRIMER COMPAÑERO ")
-        st.success("✅ SEGUNDO COMPAÑERO ")
-        st.success("✅ Hector Eduardo Rodriguez Sis 2990-18-4883 ")
-        st.success("✅ CUARTO COMPAÑERO ")
-        st.success("✅ QUINTO COMPAÑERO ")
+        st.success("✅ Esdras Moran 2990-19-7648 ")
+        st.success("✅ Haylin Morales 2990-24-10394 ")
+        st.success("✅ Hector Rodriguez  2990-18-4883 ")
+        st.success("✅ Cristian Lemus 2990-23-11823 ")
+        st.success("✅ Victor Ajcet 2990-22-4324 ")
+        st.success("✅ Dulce Figueroa 2990-23-15914 ")
 
     else:
         st.error("❌ No se encontró el archivo 'cerebro_tutor.txt'.")
